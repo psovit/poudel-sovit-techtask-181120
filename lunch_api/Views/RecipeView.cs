@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace recipes_api.views
@@ -10,5 +11,11 @@ namespace recipes_api.views
     {
         public string Title { get; set; }
         public List<string> Ingredients { get; set; }
+    }
+
+    public class RecipeWithBestBeforeDate
+    {
+        public RecipeView Recipe { get; set; }
+        public DateTime BestBefore { get; set; }
     }
 }
