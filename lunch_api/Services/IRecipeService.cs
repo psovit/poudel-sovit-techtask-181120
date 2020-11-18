@@ -26,16 +26,51 @@ namespace recipes_api.Services
             var recipeInventory = recipeRepository.GetRecipeInventory();
             var ingredientInventory = ingredientRepository.GetIngredientInventory();
 
-            var ingredients = ingredientInventory.Where(i => i.UseByDate >= DateTime.Now);
-            if(!ingredients.Any()) return null;
-           
-            var results = (from i in ingredients
-            from r in recipeInventory
-            where r.Ingredients.Any(w => w.Contains(i.Title))
-            orderby i.BestBeforeDate descending
-            select r).Distinct().ToList();
-            
-            return results;
+            var lsResults = new List<RecipeView>();
+
+            if(recipeInventory == null || recipeInventory.Count == 0 || ingredientInventory == null || ingredientInventory.Count == 0) 
+                return lsResults;
+
+            foreach(var recipe in recipeInventory)
+            {
+                var hasExpiredIngredient = false;
+                var hasIngredient = false;
+
+                foreach(var recipeIngredient in recipe.Ingredients)
+                {
+                    var ingredient = ingredientInventory.FirstOrDefault(p => p.Title == recipeIngredient);
+                    
+                    if(ingredient == null) continue;
+                    hasIngredient = true;
+
+                    var isExpired = RecipeHasExpiredIngredient(recipe, ingredient);
+                    if(isExpired)
+                    {
+                        hasExpiredIngredient = true;
+                        break;
+                    }
+                }
+
+                if(hasIngredient && !hasExpiredIngredient)
+                {
+                    lsResults.Add(recipe);
+                }
+            }
+
+            return (from r in lsResults
+              from i in ingredientInventory
+              where i.UseByDate >= DateTime.Now
+              orderby i.BestBeforeDate descending
+              select r).Distinct().ToList();
+        }
+
+        private bool RecipeHasExpiredIngredient(RecipeView recipe, IngredientView ingredient)
+        {
+            if(recipe.Ingredients.Contains(ingredient.Title))
+            {
+                return ingredient.UseByDate < DateTime.Now;
+            }
+            return false;
         }
     }
 }
