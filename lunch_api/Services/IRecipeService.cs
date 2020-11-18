@@ -26,15 +26,16 @@ namespace recipes_api.Services
             var recipeInventory = recipeRepository.GetRecipeInventory();
             var ingredientInventory = ingredientRepository.GetIngredientInventory();
 
-            var lsResults = new List<RecipeView>();
+            var lsResults = new List<RecipeWithBestBeforeDate>();
 
             if(recipeInventory == null || recipeInventory.Count == 0 || ingredientInventory == null || ingredientInventory.Count == 0) 
-                return lsResults;
+                return new List<RecipeView>();
 
             foreach(var recipe in recipeInventory)
             {
                 var hasExpiredIngredient = false;
                 var hasIngredient = false;
+                DateTime bestBeforeCheck = DateTime.Now;
 
                 foreach(var recipeIngredient in recipe.Ingredients)
                 {
@@ -42,6 +43,10 @@ namespace recipes_api.Services
                     
                     if(ingredient == null) continue;
                     hasIngredient = true;
+                    if(ingredient.BestBeforeDate < bestBeforeCheck)
+                    {
+                        bestBeforeCheck = ingredient.BestBeforeDate;
+                    }
 
                     var isExpired = RecipeHasExpiredIngredient(recipe, ingredient);
                     if(isExpired)
@@ -53,15 +58,17 @@ namespace recipes_api.Services
 
                 if(hasIngredient && !hasExpiredIngredient)
                 {
-                    lsResults.Add(recipe);
+                    lsResults.Add(
+                        new RecipeWithBestBeforeDate()
+                        { 
+                            Recipe = recipe,
+                            BestBefore = bestBeforeCheck
+                        }
+                    );
                 }
             }
 
-            return (from r in lsResults
-              from i in ingredientInventory
-              where i.UseByDate >= DateTime.Now
-              orderby i.BestBeforeDate descending
-              select r).Distinct().ToList();
+            return lsResults.OrderByDescending(p => p.BestBefore).Select(p => p.Recipe).ToList();
         }
 
         private bool RecipeHasExpiredIngredient(RecipeView recipe, IngredientView ingredient)
