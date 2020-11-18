@@ -69,9 +69,9 @@ namespace lunch_api.Tests
                 recipeWExpired, recipeWithoutExpired
             };
 
-            var emptyIngredientRepo = new TestIngredientRepository(lsIngredients);
-            var emptyRecipeRepo = new TestRecipeRepository(lsRecipes);
-            var recipeService = new RecipeService(emptyRecipeRepo, emptyIngredientRepo);
+            var ingredientRepo = new TestIngredientRepository(lsIngredients);
+            var recipeRepo = new TestRecipeRepository(lsRecipes);
+            var recipeService = new RecipeService(recipeRepo, ingredientRepo);
             var result = recipeService.GetRecipes();
 
             Assert.Equal(result.Count, 1);
@@ -124,9 +124,9 @@ namespace lunch_api.Tests
                 recipe1, recipe2
             };
 
-            var emptyIngredientRepo = new TestIngredientRepository(lsIngredients);
-            var emptyRecipeRepo = new TestRecipeRepository(lsRecipes);
-            var recipeService = new RecipeService(emptyRecipeRepo, emptyIngredientRepo);
+            var ingredientRepo = new TestIngredientRepository(lsIngredients);
+            var recipeRepo = new TestRecipeRepository(lsRecipes);
+            var recipeService = new RecipeService(recipeRepo, ingredientRepo);
             var result = recipeService.GetRecipes();
 
             Assert.Equal(result.Count, 0);
@@ -181,9 +181,9 @@ namespace lunch_api.Tests
                 recipe1, recipe2
             };
 
-            var emptyIngredientRepo = new TestIngredientRepository(lsIngredients);
-            var emptyRecipeRepo = new TestRecipeRepository(lsRecipes);
-            var recipeService = new RecipeService(emptyRecipeRepo, emptyIngredientRepo);
+            var ingredientRepo = new TestIngredientRepository(lsIngredients);
+            var recipeRepo = new TestRecipeRepository(lsRecipes);
+            var recipeService = new RecipeService(recipeRepo, ingredientRepo);
             var result = recipeService.GetRecipes();
 
             Assert.Equal(result.Count, 1);
